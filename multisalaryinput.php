@@ -30,6 +30,7 @@ $accountid = GETPOSTISSET('accountid') ? GETPOST('accountid', 'int') : 0;
 $paymenttype = GETPOSTISSET('paymenttype') ? GETPOST('paymenttype', 'int') : 0;
 $numpayment = GETPOSTISSET('num_payment') ? GETPOST('num_payment', 'int') : 0;
 $closepaidsalary = GETPOSTISSET('closepaidsalary') ? GETPOST('closepaidsalary', 'int') : 1;
+$projectid = GETPOSTISSET('fk_project') ? GETPOST('fk_project', 'int') : 0;
 
 if (GETPOSTISSET('auto_create_paiement') || $action === 'add-multiple' || $action === 'save-multiple') {
     $auto_create_paiement = GETPOST("auto_create_paiement", "int");
@@ -57,10 +58,6 @@ $hookmanager->initHooks(array('multisalarycard', 'salarycard', 'globalcard'));
 
 restrictedArea($user, 'salaries', $object->id, 'salary', '');
 
-$permissiontoread = $user->rights->salaries->read;
-$permissiontoadd = $user->rights->salaries->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-$permissiontodelete = $user->rights->salaries->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
-
 $title = $langs->trans('MultiSalaryInput') . " - " . $langs->trans('Card');
 $help_url = "";
 
@@ -78,30 +75,6 @@ if ($reshook < 0) {
 
 if (empty($reshook)) {
     $error = 0;
-
-    $backurlforlist = dol_buildpath('/salaries/list.php', 1);
-
-    if (empty($backtopage) || ($cancel && empty($id))) {
-        if (empty($backtopage) || ($cancel && strpos($backtopage, '__ID__'))) {
-            if (empty($id) && (($action != 'add' && $action != 'create') || $cancel)) {
-                $backtopage = $backurlforlist;
-            } else {
-                $backtopage = dol_buildpath('/salaries/card.php', 1) . '?id=' . ($id > 0 ? $id : '__ID__');
-            }
-        }
-    }
-
-    if ($cancel) {
-        if (!empty($backtopageforcancel)) {
-            header("Location: " . $backtopageforcancel);
-            exit;
-        } elseif (!empty($backtopage)) {
-            header("Location: " . $backtopage);
-            exit;
-        }
-
-        $action = '';
-    }
 
     switch ($action) {
         case 'add-multiple':
@@ -130,7 +103,7 @@ if (empty($reshook)) {
                 $error++;
             }
 
-            if (!empty($conf->banque->enabled) && !empty($auto_create_paiement) && !$object->accountid > 0) {
+            if (!empty($conf->banque->enabled) && !empty($auto_create_paiement) && !$accountid > 0) {
                 $bankAccountMsg = $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("BankAccount"));
                 setEventMessages($bankAccountMsg, null, 'errors');
                 $error++;
@@ -161,15 +134,20 @@ if (empty($reshook)) {
                     break;
                 }
 
+                if (floatval($employeeSalaryAmount) <= 0) {
+                    setEventMessages($langs->trans("ErrorSalaryShouldBeAPositiveNumber"), null, 'errors');
+                    $error++;
+                    break;
+                }
+
                 $salary = new Salary($db);
 
-                // Check int val
-                $salary->amount = $employeeSalaryAmount;
+                $salary->amount = floatval($employeeSalaryAmount);
                 $salary->accountid = $accountid;
                 $salary->fk_user = $employeeId;
+                $salary->label = $label;
                 $salary->datev = $datev;
                 $salary->datep = $datep;
-                $salary->label = $label;
                 $salary->datesp = $datesp;
                 $salary->dateep = $dateep;
                 $salary->note = $note;
@@ -191,8 +169,8 @@ if (empty($reshook)) {
                     break;
                 }
 
-
                 $retCreate = $salary->create($user);
+
                 if ($retCreate < 0) {
                     setEventMessages($salary->error, $salary->errors, 'errors');
                     $error++;
@@ -208,7 +186,7 @@ if (empty($reshook)) {
                 $paiement->chid = $salary->id;
                 $paiement->datepaye = $datep;
                 $paiement->datev = $datev;
-                $paiement->amounts = array($salary->id => $employeeSalaryAmount); // Tableau de montant
+                $paiement->amounts = array($salary->id => floatval($employeeSalaryAmount)); // Tableau de montant
                 $paiement->paiementtype = $paymenttype;
                 $paiement->num_payment = $numpayment;
                 $paiement->note = $note;
@@ -332,7 +310,7 @@ if ($pastmonth == 0) {
     $pastmonthyear--;
 }
 
-if (empty($datesp) || empty($dateep)) { // We define date_start and date_end
+if (empty($datesp) || empty($dateep)) { // We define  default date_start and date_end
     $datesp = dol_get_first_day($pastmonthyear, $pastmonth, false); 
     $dateep = dol_get_last_day($pastmonthyear, $pastmonth, false);
 }

@@ -38,7 +38,7 @@
     <br>
     <br>        
     <div class="center">
-        <input type="submit" class="button button-save" name="save" value="<?= $langs->trans('Save') ?>">
+        <input type="submit" class="button button-save" name="save" value="<?= $langs->trans('SaveSalaries') ?>">
         <a class="butAction" href="<?= $_SERVER["PHP_SELF"] ?>"><?= $langs->trans('Cancel') ?></a>
     </div>
 </form>
