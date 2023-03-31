@@ -294,10 +294,10 @@ class modMultiSalaryInput extends DolibarrModules
         $this->menu[$r]=array(
 			'fk_menu'=>'fk_mainmenu=billing,fk_leftmenu=tax_salary',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'=>'left',			                // This is a Left menu entry
-			'titre'=>$langs->trans('MultiSalatyInput'),
+			'titre'=>$langs->trans('MultiSalaryInput'),
 			'mainmenu'=>'billing',
 			'leftmenu'=>'tax_salary',
-			'url'=>'/multisalaryinput/multisalaryinput.php',
+			'url'=>'/multisalaryinput/multisalaryinput.php?leftmenu=tax_salary',
 			'langs'=>'multisalaryinput@multisalaryinput',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position'=>100+$r,
 			'enabled'=> '$conf->multisalaryinput->enabled',  // Define condition to show or hide menu entry. Use '$conf->missionorder->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.

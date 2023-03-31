@@ -26,4 +26,10 @@ ModuleMultiSalaryInputDesc = Saisie Multi-salaires
 #
 # MultiSalatyInput Page 
 #
-MultiSalatyInput = Saisie multi-salaire
+MultiSalaryInput = Saisie multi-salaires
+Employees = Salariés
+Next = Suivant
+NewSalaries = Nouveaux Salaires
+ErrorEmployeesOrUserGroupRequired = La liste des employés et / ou le groupe d'utilisateur est requis pour passer à la saisie des salaires; 
+EmployeeNotFound = L'un des employée sélectionné n'a pas été retrouvé dans la base de données.
+ErrorMissingSalary = Vous devez remplir les salaires de tous les employés séléctionnés pour passer à l'étape suivante.
