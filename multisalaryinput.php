@@ -29,13 +29,18 @@ $usergroup = GETPOST("usergroup", "int");
 $accountid = GETPOSTISSET('accountid') ? GETPOST('accountid', 'int') : 0;
 $paymenttype = GETPOSTISSET('paymenttype') ? GETPOST('paymenttype', 'int') : 0;
 $numpayment = GETPOSTISSET('num_payment') ? GETPOST('num_payment', 'int') : 0;
-$closepaidsalary = GETPOSTISSET('closepaidsalary') ? GETPOST('closepaidsalary', 'int') : 1;
 $projectid = GETPOSTISSET('fk_project') ? GETPOST('fk_project', 'int') : 0;
 
 if (GETPOSTISSET('auto_create_paiement') || $action === 'add-multiple' || $action === 'save-multiple') {
     $auto_create_paiement = GETPOST("auto_create_paiement", "int");
 } else {
     $auto_create_paiement = empty($conf->global->CREATE_NEW_SALARY_WITHOUT_AUTO_PAYMENT);
+}
+
+if (GETPOSTISSET('closepaidsalary') || $action === 'add-multiple' || $action === 'save-multiple') {
+    $closepaidsalary = GETPOST("closepaidsalary", "int");
+} else {
+    $closepaidsalary = 1;
 }
 
 $datep = dol_mktime(12, 0, 0, GETPOST("datepmonth", 'int'), GETPOST("datepday", 'int'), GETPOST("datepyear", 'int'));

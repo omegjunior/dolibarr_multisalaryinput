@@ -130,7 +130,7 @@
     </table>
     <div class="center">
         <div class="hide_if_no_auto_create_payment paddingbottom">
-            <input type="checkbox" checked value="<?= $closepaidsalary ?>" name="closepaidsalary"><?= $langs->trans("ClosePaidSalaryAutomatically") ?>
+            <input type="checkbox" <?= ($closepaidsalary > 0 ? 'checked' : '') ?> value="<?= $closepaidsalary ?>" name="closepaidsalary"><?= $langs->trans("ClosePaidSalaryAutomatically") ?>
         </div>
     </div>
     <div class="center">
