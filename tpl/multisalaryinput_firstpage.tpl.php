@@ -80,8 +80,8 @@
                 <?= $form->editfieldkey('BankAccount', 'selectaccountid', '', $object, 0, 'string', '', 1) ?>
             </td>
             <td> 
-                <?= img_picto('', 'bank_account', 'class="paddingrighonly"')
-            . $form->select_comptes($accountid, "accountid", 0, '', 1) ?>
+                <?= img_picto('', 'bank_account', 'class="paddingrightonly"') ?>
+                <?php $form->select_comptes($accountid, "accountid", 0, '', 1) ?>
             </td>
         </tr>
 <?php endif; ?>
@@ -116,7 +116,7 @@
                 <label for="num_payment"><?= $langs->trans('Numero') ?> <em>(<?= $langs->trans("ChequeOrTransferNumber") ?>)</em></label>
             </td>
             <td>
-                <input name="num_payment" id="num_payment" type="text" value="<?= $numpayment ?>">
+                <input name="num_payment" id="num_payment" type="text" value="<?= $numpayment ? : '' ?>">
             </td>
         </tr>
 <?php endif; ?>
