@@ -34,7 +34,7 @@ $projectid = GETPOSTISSET('fk_project') ? GETPOST('fk_project', 'int') : 0;
 if (GETPOSTISSET('auto_create_paiement') || $action === 'add-multiple' || $action === 'save-multiple') {
     $auto_create_paiement = GETPOST("auto_create_paiement", "int");
 } else {
-    $auto_create_paiement = empty($conf->global->CREATE_NEW_SALARY_WITHOUT_AUTO_PAYMENT);
+    $auto_create_paiement = empty(getDolGlobalString('CREATE_NEW_SALARY_WITHOUT_AUTO_PAYMENT'));
 }
 
 if (GETPOSTISSET('closepaidsalary') || $action === 'add-multiple' || $action === 'save-multiple') {
@@ -316,7 +316,7 @@ if ($pastmonth == 0) {
 }
 
 if (empty($datesp) || empty($dateep)) { // We define  default date_start and date_end
-    $datesp = dol_get_first_day($pastmonthyear, $pastmonth, false); 
+    $datesp = dol_get_first_day($pastmonthyear, $pastmonth, false);
     $dateep = dol_get_last_day($pastmonthyear, $pastmonth, false);
 }
 

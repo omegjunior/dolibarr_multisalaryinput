@@ -79,12 +79,12 @@ function getEmployeeArray(&$employeesArray, &$errors)
     }
 
     $sql .= " FROM " . MAIN_DB_PREFIX . "user as u";
-    
+
     if (!empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && !$user->entity) {
         $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "entity as e ON e.rowid = u.entity";
         $sql .= " WHERE u.entity IS NOT NULL";
     } else {
-        if (!empty($conf->multicompany->enabled) && !empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE)) {
+        if (!empty($conf->multicompany->enabled) && !empty(getDolGlobalString('MULTICOMPANY_TRANSVERSE_MODE'))) {
             $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "usergroup_user as ug";
             $sql .= " ON ug.fk_user = u.rowid";
             $sql .= " WHERE ug.entity = " . $conf->entity;
@@ -95,26 +95,26 @@ function getEmployeeArray(&$employeesArray, &$errors)
 
     $sql .= " AND COALESCE(u.employee,0) <> 0";
 
-    if (!empty($conf->global->USER_HIDE_INACTIVE_IN_COMBOBOX)) {
+    if (!empty(getDolGlobalString('USER_HIDE_INACTIVE_IN_COMBOBOX'))) {
         $sql .= " AND COALESCE(u.statut,0) <> 0";
     }
 
     //Add hook to filter on user (for exemple on usergroup define in custom modules)
     $reshook = $hookmanager->executeHooks('addSQLWhereFilterOnSelectUsers', array());
-    
+
     if (!empty($reshook)) {
         $sql .= $hookmanager->resPrint;
     }
 
     // MAIN_FIRSTNAME_NAME_POSITION is 0 means firstname+lastname
-    if (empty($conf->global->MAIN_FIRSTNAME_NAME_POSITION)) {
+    if (empty(getDolGlobalString('MAIN_FIRSTNAME_NAME_POSITION'))) {
         $sql .= " ORDER BY u.statut DESC, u.firstname ASC, u.lastname ASC";
     } else {
         $sql .= " ORDER BY u.statut DESC, u.lastname ASC, u.firstname ASC";
     }
 
     $resql = $db->query($sql);
-    
+
     if (!$resql) {
         $errors = $db->lasterror();
         return -1;
