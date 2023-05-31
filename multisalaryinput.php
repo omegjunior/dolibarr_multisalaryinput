@@ -12,7 +12,7 @@ require_once MULTISALARY_DOCUMENT_ROOT . '/lib/multisalaryinput.lib.php';
 // Load translation files required by the page
 $langs->loadLangs(array("multisalaryinput@multisalaryinput", "bills", "users", "salaries"));
 
-if (!empty($conf->projet->enabled)) {
+if (isModEnabled('project')) {
     $langs->load("projects");
 }
 
@@ -108,7 +108,7 @@ if (empty($reshook)) {
                 $error++;
             }
 
-            if (!empty($conf->banque->enabled) && !empty($auto_create_paiement) && !$accountid > 0) {
+            if (!empty(isModEnabled('banque')) && !empty($auto_create_paiement) && !$accountid > 0) {
                 $bankAccountMsg = $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("BankAccount"));
                 setEventMessages($bankAccountMsg, null, 'errors');
                 $error++;

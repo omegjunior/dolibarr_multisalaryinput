@@ -21,6 +21,37 @@
  * \brief   Library files with common functions for MultiSalaryInput
  */
 
+require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
+
+if (!function_exists('isModEnabled')) {
+	/**
+	 * Is Dolibarr module enabled
+	 *
+	 * @param string $module Module name to check
+	 * @return    boolean                True if module is enabled
+	 */
+	function isModEnabled($module)
+	{
+		global $conf;
+
+		// Fix special cases
+		$arrayconv = array(
+			'project' => 'projet',
+			'contract' => 'contrat'
+		);
+		if (empty(getDolGlobalString('MAIN_USE_NEW_SUPPLIERMOD'))) {
+			$arrayconv['supplier_order'] = 'fournisseur';
+			$arrayconv['supplier_invoice'] = 'fournisseur';
+		}
+		if (!empty($arrayconv[$module])) {
+			$module = $arrayconv[$module];
+		}
+
+		//return !empty($conf->modules[$module]);
+		return !empty($conf->$module->enabled);
+	}
+}
+
 /**
  * Prepare admin pages header
  *
@@ -70,63 +101,63 @@ function multisalaryinputAdminPrepareHead()
 
 function getEmployeeArray(&$employeesArray, &$errors)
 {
-    global $db, $user, $conf, $hookmanager;
-    // Forge request to select users
-    $sql = "SELECT DISTINCT u.rowid, u.lastname as lastname, u.firstname";
+	global $db, $user, $conf, $hookmanager;
+	// Forge request to select users
+	$sql = "SELECT DISTINCT u.rowid, u.lastname as lastname, u.firstname";
 
-    if (!empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && !$user->entity) {
-        $sql .= ", e.label";
-    }
+	if (!empty(isModEnabled('multicompany')) && $conf->entity == 1 && $user->admin && !$user->entity) {
+		$sql .= ", e.label";
+	}
 
-    $sql .= " FROM " . MAIN_DB_PREFIX . "user as u";
+	$sql .= " FROM " . MAIN_DB_PREFIX . "user as u";
 
-    if (!empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && !$user->entity) {
-        $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "entity as e ON e.rowid = u.entity";
-        $sql .= " WHERE u.entity IS NOT NULL";
-    } else {
-        if (!empty($conf->multicompany->enabled) && !empty(getDolGlobalString('MULTICOMPANY_TRANSVERSE_MODE'))) {
-            $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "usergroup_user as ug";
-            $sql .= " ON ug.fk_user = u.rowid";
-            $sql .= " WHERE ug.entity = " . $conf->entity;
-        } else {
-            $sql .= " WHERE u.entity IN (0, " . $conf->entity . ")";
-        }
-    }
+	if (!empty(isModEnabled('multicompany')) && $conf->entity == 1 && $user->admin && !$user->entity) {
+		$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "entity as e ON e.rowid = u.entity";
+		$sql .= " WHERE u.entity IS NOT NULL";
+	} else {
+		if (!empty(isModEnabled('multicompany')) && !empty(getDolGlobalString('MULTICOMPANY_TRANSVERSE_MODE'))) {
+			$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "usergroup_user as ug";
+			$sql .= " ON ug.fk_user = u.rowid";
+			$sql .= " WHERE ug.entity = " . $conf->entity;
+		} else {
+			$sql .= " WHERE u.entity IN (0, " . $conf->entity . ")";
+		}
+	}
 
-    $sql .= " AND COALESCE(u.employee,0) <> 0";
+	$sql .= " AND COALESCE(u.employee,0) <> 0";
 
-    if (!empty(getDolGlobalString('USER_HIDE_INACTIVE_IN_COMBOBOX'))) {
-        $sql .= " AND COALESCE(u.statut,0) <> 0";
-    }
+	if (!empty(getDolGlobalString('USER_HIDE_INACTIVE_IN_COMBOBOX'))) {
+		$sql .= " AND COALESCE(u.statut,0) <> 0";
+	}
 
-    //Add hook to filter on user (for exemple on usergroup define in custom modules)
-    $reshook = $hookmanager->executeHooks('addSQLWhereFilterOnSelectUsers', array());
+	//Add hook to filter on user (for exemple on usergroup define in custom modules)
+	$reshook = $hookmanager->executeHooks('addSQLWhereFilterOnSelectUsers', array());
 
-    if (!empty($reshook)) {
-        $sql .= $hookmanager->resPrint;
-    }
+	if (!empty($reshook)) {
+		$sql .= $hookmanager->resPrint;
+	}
 
-    // MAIN_FIRSTNAME_NAME_POSITION is 0 means firstname+lastname
-    if (empty(getDolGlobalString('MAIN_FIRSTNAME_NAME_POSITION'))) {
-        $sql .= " ORDER BY u.statut DESC, u.firstname ASC, u.lastname ASC";
-    } else {
-        $sql .= " ORDER BY u.statut DESC, u.lastname ASC, u.firstname ASC";
-    }
+	// MAIN_FIRSTNAME_NAME_POSITION is 0 means firstname+lastname
+	if (empty(getDolGlobalString('MAIN_FIRSTNAME_NAME_POSITION'))) {
+		$sql .= " ORDER BY u.statut DESC, u.firstname ASC, u.lastname ASC";
+	} else {
+		$sql .= " ORDER BY u.statut DESC, u.lastname ASC, u.firstname ASC";
+	}
 
-    $resql = $db->query($sql);
+	$resql = $db->query($sql);
 
-    if (!$resql) {
-        $errors = $db->lasterror();
-        return -1;
-    }
+	if (!$resql) {
+		$errors = $db->lasterror();
+		return -1;
+	}
 
 
-    $num = $db->num_rows($resql);
+	$num = $db->num_rows($resql);
 
-    for ($i = 0; $i < $num; $i++) {
-        $obj = $db->fetch_object($resql);
-        $employeesArray[$obj->rowid] = $obj->firstname . ' ' . $obj->lastname;
-    }
+	for ($i = 0; $i < $num; $i++) {
+		$obj = $db->fetch_object($resql);
+		$employeesArray[$obj->rowid] = $obj->firstname . ' ' . $obj->lastname;
+	}
 
-    return 1;
+	return 1;
 }

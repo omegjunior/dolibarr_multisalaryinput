@@ -21,14 +21,14 @@
 <?php if (empty($reshook)) : ?>
         <?= $object->showOptionals($extrafields, 'create'); ?>
 <?php endif; ?>
-        
+
     </div>
     <table class="border centpercent">
 <?php foreach ($employeesArray as $employee): ?>
         <tr>
             <td><?= $employee->getNomUrl() ?></td>
             <td class="left">
-                <input name="employees_salary_amount[<?= $employee->id ?>]" 
+                <input autocomplete="off" name="employees_salary_amount[<?= $employee->id ?>]"
                        value="<?= $employeesSalaryAmount[$employee->id] ? : '' ?>"
                        placeholder="€" />
             </td>
@@ -36,7 +36,7 @@
 <?php endforeach; ?>
     </table>
     <br>
-    <br>        
+    <br>
     <div class="center">
         <input type="submit" class="button button-save" name="save" value="<?= $langs->trans('SaveSalaries') ?>">
         <a class="butAction" href="<?= $_SERVER["PHP_SELF"] ?>"><?= $langs->trans('Cancel') ?></a>
