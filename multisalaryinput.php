@@ -139,7 +139,7 @@ if (empty($reshook)) {
                     break;
                 }
 
-                if (floatval($employeeSalaryAmount) <= 0) {
+                if (price2num($employeeSalaryAmount) <= 0) {
                     setEventMessages($langs->trans("ErrorSalaryShouldBeAPositiveNumber"), null, 'errors');
                     $error++;
                     break;
@@ -147,7 +147,7 @@ if (empty($reshook)) {
 
                 $salary = new Salary($db);
 
-                $salary->amount = floatval($employeeSalaryAmount);
+                $salary->amount = price2num($employeeSalaryAmount);
                 $salary->accountid = $accountid;
                 $salary->fk_user = $employeeId;
                 $salary->label = $label;
@@ -191,7 +191,7 @@ if (empty($reshook)) {
                 $paiement->chid = $salary->id;
                 $paiement->datepaye = $datep;
                 $paiement->datev = $datev;
-                $paiement->amounts = array($salary->id => floatval($employeeSalaryAmount)); // Tableau de montant
+                $paiement->amounts = array($salary->id => price2num($employeeSalaryAmount)); // Tableau de montant
                 $paiement->paiementtype = $paymenttype;
                 $paiement->num_payment = $numpayment;
                 $paiement->note = $note;
