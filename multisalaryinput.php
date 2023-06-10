@@ -12,7 +12,7 @@ require_once MULTISALARY_DOCUMENT_ROOT . '/lib/multisalaryinput.lib.php';
 // Load translation files required by the page
 $langs->loadLangs(array("multisalaryinput@multisalaryinput", "bills", "users", "salaries"));
 
-if (!empty($conf->projet->enabled)) {
+if (isModEnabled('project')) {
     $langs->load("projects");
 }
 
@@ -34,7 +34,7 @@ $projectid = GETPOSTISSET('fk_project') ? GETPOST('fk_project', 'int') : 0;
 if (GETPOSTISSET('auto_create_paiement') || $action === 'add-multiple' || $action === 'save-multiple') {
     $auto_create_paiement = GETPOST("auto_create_paiement", "int");
 } else {
-    $auto_create_paiement = empty($conf->global->CREATE_NEW_SALARY_WITHOUT_AUTO_PAYMENT);
+    $auto_create_paiement = empty(getDolGlobalString('CREATE_NEW_SALARY_WITHOUT_AUTO_PAYMENT'));
 }
 
 if (GETPOSTISSET('closepaidsalary') || $action === 'add-multiple' || $action === 'save-multiple') {
@@ -108,7 +108,7 @@ if (empty($reshook)) {
                 $error++;
             }
 
-            if (!empty($conf->banque->enabled) && !empty($auto_create_paiement) && !$accountid > 0) {
+            if (!empty(isModEnabled('banque')) && !empty($auto_create_paiement) && !$accountid > 0) {
                 $bankAccountMsg = $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("BankAccount"));
                 setEventMessages($bankAccountMsg, null, 'errors');
                 $error++;
@@ -139,7 +139,7 @@ if (empty($reshook)) {
                     break;
                 }
 
-                if (floatval($employeeSalaryAmount) <= 0) {
+                if (price2num($employeeSalaryAmount) <= 0) {
                     setEventMessages($langs->trans("ErrorSalaryShouldBeAPositiveNumber"), null, 'errors');
                     $error++;
                     break;
@@ -147,7 +147,7 @@ if (empty($reshook)) {
 
                 $salary = new Salary($db);
 
-                $salary->amount = floatval($employeeSalaryAmount);
+                $salary->amount = price2num($employeeSalaryAmount);
                 $salary->accountid = $accountid;
                 $salary->fk_user = $employeeId;
                 $salary->label = $label;
@@ -191,7 +191,7 @@ if (empty($reshook)) {
                 $paiement->chid = $salary->id;
                 $paiement->datepaye = $datep;
                 $paiement->datev = $datev;
-                $paiement->amounts = array($salary->id => floatval($employeeSalaryAmount)); // Tableau de montant
+                $paiement->amounts = array($salary->id => price2num($employeeSalaryAmount)); // Tableau de montant
                 $paiement->paiementtype = $paymenttype;
                 $paiement->num_payment = $numpayment;
                 $paiement->note = $note;
@@ -316,7 +316,7 @@ if ($pastmonth == 0) {
 }
 
 if (empty($datesp) || empty($dateep)) { // We define  default date_start and date_end
-    $datesp = dol_get_first_day($pastmonthyear, $pastmonth, false); 
+    $datesp = dol_get_first_day($pastmonthyear, $pastmonth, false);
     $dateep = dol_get_last_day($pastmonthyear, $pastmonth, false);
 }
 

@@ -16,10 +16,10 @@
                 <?= $form->editfieldkey('Label', 'label', '', $object, 0, 'string', '', 1) ?>
             </td>
             <td>
-                <input 
-                    name="label" 
-                    id="label" 
-                    class="minwidth300" 
+                <input
+                    name="label"
+                    id="label"
+                    class="minwidth300"
                     value="<?= ($label ? : $langs->trans("Salary")) ?>">
             </td>
         </tr>
@@ -39,7 +39,7 @@
                 <?= $form->selectDate($dateep, "dateep", '', '', '', 'add') ?>
             </td>
         </tr>
-<?php if (!empty($conf->projet->enabled)) : ?>
+<?php if (!empty(isModEnabled('project'))) : ?>
         <tr>
             <td>
                 <?= $langs->trans("Project") ?>
@@ -66,20 +66,21 @@
                 <label for="auto_create_paiement"><?= $langs->trans('AutomaticCreationPayment') ?></label>
             </td>
             <td>
-                <input 
-                    id="auto_create_paiement" 
-                    name="auto_create_paiement" 
-                    type="checkbox" 
-                    <?= (empty($auto_create_paiement) ? '' : 'checked="checked"') ?> 
+                <input
+                    id="auto_create_paiement"
+                    name="auto_create_paiement"
+                    type="checkbox"
+                    <?= (empty($auto_create_paiement) ? '' : 'checked="checked"') ?>
                     value="1">
             </td>
         </tr>
-<?php if (!empty($conf->banque->enabled)) : ?>
+
+<?php if (!empty(isModEnabled("banque"))) : ?>
         <tr>
             <td id="label_fk_account">
                 <?= $form->editfieldkey('BankAccount', 'selectaccountid', '', $object, 0, 'string', '', 1) ?>
             </td>
-            <td> 
+            <td>
                 <?= img_picto('', 'bank_account', 'class="paddingrightonly"') ?>
                 <?php $form->select_comptes($accountid, "accountid", 0, '', 1) ?>
             </td>
@@ -110,7 +111,7 @@
             </td>
         </tr>
 
-<?php if (!empty($conf->banque->enabled)) : ?>
+<?php if (!empty(isModEnabled("banque"))) : ?>
         <tr class="hide_if_no_auto_create_payment">
             <td>
                 <label for="num_payment"><?= $langs->trans('Numero') ?> <em>(<?= $langs->trans("ChequeOrTransferNumber") ?>)</em></label>
@@ -120,7 +121,7 @@
             </td>
         </tr>
 <?php endif; ?>
-        
+
 <?php $reshook = $hookmanager->executeHooks('formObjectOptions', $parameters, $object, $action); ?>
         <?=$hookmanager->resPrint; ?>
 <?php if (empty($reshook)) : ?>
