@@ -98,8 +98,13 @@ function multisalaryinputAdminPrepareHead()
 	return $head;
 }
 
-
-function getEmployeeArray(&$employeesArray, &$errors)
+/**
+ * @param $employeesArray array
+ * @param $userGroup integer Group Id
+ * @param $errors string error string
+ * @return int
+ */
+function getEmployeeArray(&$employeesArray, $userGroup, &$errors)
 {
 	global $db, $user, $conf, $hookmanager;
 	// Forge request to select users
@@ -116,9 +121,12 @@ function getEmployeeArray(&$employeesArray, &$errors)
 		$sql .= " WHERE u.entity IS NOT NULL";
 	} else {
 		if (!empty(isModEnabled('multicompany')) && !empty(getDolGlobalString('MULTICOMPANY_TRANSVERSE_MODE'))) {
-			$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "usergroup_user as ug";
+			$sql .= " INNER JOIN " . MAIN_DB_PREFIX . "usergroup_user as ug";
 			$sql .= " ON ug.fk_user = u.rowid";
-			$sql .= " WHERE ug.entity = " . $conf->entity;
+			$sql .= " AND ug.entity = " . $conf->entity;
+			if ($userGroup > 0) {
+				$sql .= " AND ug.fk_usergroup = " . (int)$userGroup;
+			}
 		} else {
 			$sql .= " WHERE u.entity IN (0, " . $conf->entity . ")";
 		}
@@ -139,9 +147,9 @@ function getEmployeeArray(&$employeesArray, &$errors)
 
 	// MAIN_FIRSTNAME_NAME_POSITION is 0 means firstname+lastname
 	if (empty(getDolGlobalString('MAIN_FIRSTNAME_NAME_POSITION'))) {
-		$sql .= " ORDER BY u.statut DESC, u.firstname ASC, u.lastname ASC";
+		$sql .= " ORDER BY u.firstname ASC, u.lastname ASC";
 	} else {
-		$sql .= " ORDER BY u.statut DESC, u.lastname ASC, u.firstname ASC";
+		$sql .= " ORDER BY u.lastname ASC, u.firstname ASC";
 	}
 
 	$resql = $db->query($sql);
@@ -156,8 +164,71 @@ function getEmployeeArray(&$employeesArray, &$errors)
 
 	for ($i = 0; $i < $num; $i++) {
 		$obj = $db->fetch_object($resql);
-		$employeesArray[$obj->rowid] = $obj->firstname . ' ' . $obj->lastname;
+		if (empty(getDolGlobalString('MAIN_FIRSTNAME_NAME_POSITION'))) {
+			$employeesArray[$obj->rowid] = $obj->firstname . ' ' . $obj->lastname;
+		} else {
+			$employeesArray[$obj->rowid] = $obj->lastname . ' ' . $obj->firstname;
+		}
 	}
 
 	return 1;
+}
+
+/**
+ * @param $userGroup integer Group Id
+ * @param $errors string error string
+ * @return int|array
+ */
+function getEmployeeArrayForGroup($userGroup, &$errors) {
+
+	global $db;
+
+	$employeesArray = [];
+	$ret = getEmployeeArray($employeesArray, $userGroup, $errors);
+	if ($ret < 0) {
+		return -1;
+	}
+
+	$usersArray = [];
+	require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+	foreach ($employeesArray as $employeeId=>$employeeFullName) {
+		$employee = new User($db);
+
+		$retFetch = $employee->fetch($employeeId);
+		if ($retFetch < 0) {
+			$errors .= $employee->error;
+			if (!empty($employee->errors)) {
+				foreach ($employee->errors as $eerr) {
+					$errors .= $eerr;
+				}
+			}
+			return -1;
+		} else {
+			$usersArray[] = $employee;
+		}
+	}
+	return $usersArray;
+}
+
+/**
+ * Use to Sort User/Empoyee array by name
+ * @param $emp1 User user 1
+ * @param $emp2 User user 1
+ * @return int
+ */
+function sortEmployee($emp1, $emp2) {
+	if (empty(getDolGlobalString('MAIN_FIRSTNAME_NAME_POSITION'))) {
+		if ($emp1->firstname > $emp2->firstname) {
+			return 1;
+		} else {
+			return -1;
+		}
+
+	} else {
+		if ($emp1->lastname > $emp2->lastname) {
+			return 1;
+		} else {
+			return -1;
+		}
+	}
 }

@@ -235,7 +235,7 @@ if (empty($reshook)) {
  */
 $allEmployeesArray = [];
 $errors = [];
-$ret = getEmployeeArray($allEmployeesArray, $errors);
+$ret = getEmployeeArray($allEmployeesArray, 0, $errors);
 
 if ($ret < 0) {
     llxHeader("", $title, $help_url);
@@ -244,6 +244,7 @@ if ($ret < 0) {
 }
 
 if ($action == 'add-multiple') {
+
     $employeesArray = [];
 
     if (!empty($employees)) {
@@ -264,20 +265,35 @@ if ($action == 'add-multiple') {
 
             $employeesArray[] = $employee;
         }
+		if (!empty($employeesArray)) {
+			uasort($employeesArray,'sortEmployee');
+		}
     }
 
     if ($usergroup > 0) {
-        $userGroupObject = new UserGroup($db);
 
-        $userGroupObject->id = $usergroup;
-        $userList = $userGroupObject->listUsersForGroup('COALESCE(employee, 0) <> 0');
+		if (!empty(isModEnabled('multicompany')) && !empty(getDolGlobalString('MULTICOMPANY_TRANSVERSE_MODE'))) {
+			$userList = [];
+			$userList = getEmployeeArrayForGroup($usergroup, $errors);
+			 if (is_numeric($userList) && $userList < 0) {
+         	    llxHeader("", $title, $help_url);
+	            setEventMessage($errors, 'errors');
+    	        llxFooter();
+        	    exit;
+        	}
+		} else {
+			$userGroupObject = new UserGroup($db);
+        	$userGroupObject->id = $usergroup;
+			$userList = $userGroupObject->listUsersForGroup('COALESCE(employee, 0) <> 0');
+			 if (is_numeric($userList) && $userList < 0) {
+				llxHeader("", $title, $help_url);
+				dol_print_error($db, $userGroupObject->error, $userGroupObject->errors);
+				llxFooter();
+				exit;
+        	}
+		}
 
-        if (is_numeric($userList) && $userList < 0) {
-            llxHeader("", $title, $help_url);
-            dol_print_error($db, $userGroupObject->error, $userGroupObject->errors);
-            llxFooter();
-            exit;
-        }
+
 
         if (empty($employeesArray)) {
             $employeesArray = $userList;
@@ -297,6 +313,10 @@ if ($action == 'add-multiple') {
                 }
             }
         }
+
+		if (!empty($employeesArray)) {
+			uasort($employeesArray,'sortEmployee');
+		}
     }
 }
 

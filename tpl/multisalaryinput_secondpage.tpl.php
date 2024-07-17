@@ -29,11 +29,20 @@
             <td><?= $employee->getNomUrl() ?></td>
             <td class="left">
                 <input autocomplete="off" name="employees_salary_amount[<?= $employee->id ?>]"
+					   id="employees_salary_amount_<?= $employee->id ?>"
                        value="<?= $employeesSalaryAmount[$employee->id] ? : '' ?>"
-                       placeholder="€" />
+                       placeholder="€" class="autocalc"/>
             </td>
         </tr>
 <?php endforeach; ?>
+		<?php if (!empty($employeesArray)) { ?>
+		<tr>
+            <td>Total</td>
+            <td class="left">
+                <input id="totalamount" disabled="disabled" readonly="readonly">
+            </td>
+        </tr>
+		<?php } ?>
     </table>
     <br>
     <br>
@@ -42,3 +51,15 @@
         <a class="butAction" href="<?= $_SERVER["PHP_SELF"] ?>"><?= $langs->trans('Cancel') ?></a>
     </div>
 </form>
+
+<script language="JavaScript">
+	$('.autocalc').on("input keyup",function() {
+		let totalamount = 0;
+		$('.autocalc').each(function (){
+			if (!isNaN(price2numjs($(this).val())) && $(this).val() !== "") {
+				totalamount += price2numjs($(this).val());
+			}
+		})
+		$('#totalamount').val(dolroundjs(totalamount,2));
+	});
+</script>
