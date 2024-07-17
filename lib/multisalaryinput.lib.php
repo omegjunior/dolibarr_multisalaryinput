@@ -133,10 +133,7 @@ function getEmployeeArray(&$employeesArray, $userGroup, &$errors)
 	}
 
 	$sql .= " AND COALESCE(u.employee,0) <> 0";
-
-	if (!empty(getDolGlobalString('USER_HIDE_INACTIVE_IN_COMBOBOX'))) {
-		$sql .= " AND COALESCE(u.statut,0) <> 0";
-	}
+	$sql .= " AND COALESCE(u.statut,0) <> 0";
 
 	//Add hook to filter on user (for exemple on usergroup define in custom modules)
 	$reshook = $hookmanager->executeHooks('addSQLWhereFilterOnSelectUsers', array());
