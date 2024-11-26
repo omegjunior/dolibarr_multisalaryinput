@@ -188,11 +188,17 @@ if (empty($reshook)) {
 
                 // Create a line of payments
                 $paiement = new PaymentSalary($db);
-                $paiement->fk_salary = $salary->id;
-                $paiement->datep = $datep;
+				if ((float) DOL_VERSION >= 18.0) {
+					$paiement->fk_salary = $salary->id;
+                	$paiement->datep = $datep;
+					$paiement->fk_typepayment = $paymenttype;
+				} else {
+					$paiement->chid = $salary->id;
+                	$paiement->datepaye = $datep;
+				 	$paiement->paiementtype = $paymenttype;
+				}
                 $paiement->datev = $datev;
                 $paiement->amounts = array($salary->id => price2num($employeeSalaryAmount)); // Tableau de montant
-                $paiement->fk_typepayment = $paymenttype;
                 $paiement->num_payment = $numpayment;
                 $paiement->note = $note;
 
