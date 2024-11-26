@@ -30,7 +30,7 @@
             <td class="left">
                 <input autocomplete="off" name="employees_salary_amount[<?= $employee->id ?>]"
 					   id="employees_salary_amount_<?= $employee->id ?>"
-                       value="<?= $employeesSalaryAmount[$employee->id] ? : '' ?>"
+                       value="<?= (!isset($employeesSalaryAmount[$employee->id]) ? '' : $employeesSalaryAmount[$employee->id]) ?>"
                        placeholder="€" class="autocalc"/>
             </td>
         </tr>

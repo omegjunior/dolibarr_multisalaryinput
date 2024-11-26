@@ -188,11 +188,11 @@ if (empty($reshook)) {
 
                 // Create a line of payments
                 $paiement = new PaymentSalary($db);
-                $paiement->chid = $salary->id;
-                $paiement->datepaye = $datep;
+                $paiement->fk_salary = $salary->id;
+                $paiement->datep = $datep;
                 $paiement->datev = $datev;
                 $paiement->amounts = array($salary->id => price2num($employeeSalaryAmount)); // Tableau de montant
-                $paiement->paiementtype = $paymenttype;
+                $paiement->fk_typepayment = $paymenttype;
                 $paiement->num_payment = $numpayment;
                 $paiement->note = $note;
 
