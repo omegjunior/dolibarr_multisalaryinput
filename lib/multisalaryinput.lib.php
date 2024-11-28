@@ -110,30 +110,32 @@ function getEmployeeArray(&$employeesArray, $userGroup, &$errors)
 	// Forge request to select users
 	$sql = "SELECT DISTINCT u.rowid, u.lastname as lastname, u.firstname";
 
-	if (!empty(isModEnabled('multicompany')) && $conf->entity == 1 && $user->admin && !$user->entity) {
+	if (!empty(isModEnabled('multicompany'))) {
 		$sql .= ", e.label";
 	}
 
 	$sql .= " FROM " . MAIN_DB_PREFIX . "user as u";
 
-	if (!empty(isModEnabled('multicompany')) && $conf->entity == 1 && $user->admin && !$user->entity) {
+	if (!empty(isModEnabled('multicompany'))) {
 		$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "entity as e ON e.rowid = u.entity";
+	}
+
+	if (!empty(isModEnabled('multicompany')) && !empty(getDolGlobalString('MULTICOMPANY_TRANSVERSE_MODE'))) {
+		$sql .= " INNER JOIN " . MAIN_DB_PREFIX . "usergroup_user as ug";
+		$sql .= " ON ug.fk_user = u.rowid";
+		$sql .= " AND ug.entity = " . $conf->entity;
+		if ($userGroup > 0) {
+			$sql .= " AND ug.fk_usergroup = " . (int)$userGroup;
+		}
+	} elseif (!empty(isModEnabled('multicompany')) && $conf->entity == 1 && $user->admin && !$user->entity) {
 		$sql .= " WHERE u.entity IS NOT NULL";
 	} else {
-		if (!empty(isModEnabled('multicompany')) && !empty(getDolGlobalString('MULTICOMPANY_TRANSVERSE_MODE'))) {
-			$sql .= " INNER JOIN " . MAIN_DB_PREFIX . "usergroup_user as ug";
-			$sql .= " ON ug.fk_user = u.rowid";
-			$sql .= " AND ug.entity = " . $conf->entity;
-			if ($userGroup > 0) {
-				$sql .= " AND ug.fk_usergroup = " . (int)$userGroup;
-			}
-		} else {
-			$sql .= " WHERE u.entity IN (0, " . $conf->entity . ")";
-		}
+		$sql .= " WHERE u.entity IN (0, " . $conf->entity . ")";
 	}
 
 	$sql .= " AND COALESCE(u.employee,0) <> 0";
 	$sql .= " AND COALESCE(u.statut,0) <> 0";
+
 
 	//Add hook to filter on user (for exemple on usergroup define in custom modules)
 	$reshook = $hookmanager->executeHooks('addSQLWhereFilterOnSelectUsers', array());
